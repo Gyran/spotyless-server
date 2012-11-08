@@ -4,7 +4,7 @@ var fs = require('fs');
 var qs = require('querystring');
 
 /* Config */
-var SERVER_PORT = 1337;
+var SERVER_PORT = 9003;
 /**********/
 
 // { user: anonymid, response: responseObject }
@@ -98,14 +98,19 @@ function handleRequest(response, pathname, query) {
 				var command = query.command;
 				var spotify = spotifys[getSpotify(user)];
 
-				response.writeHead(200, { 'Content-Type': 'text/plain'} );
-				spotify.response.write(command);
-				spotify.response.end();
+				console.log(command);
 
-				response.write("Command sent");
+				response.writeHead(200, { 'Content-Type': 'text/plain'} );
+				if (spotify) {
+					spotify.response.write(command);
+					spotify.response.end();
+
+					console.log("Command sent");
+				} else {
+					console.log('No spotify [' + user + '] connected');
+				}
 				response.end();
 
-				console.log('Sending command [' + command + '] to user [' + user + ']');
 				break;
 			case '/login': // Client is logging in
 				var user = query.user;
@@ -118,16 +123,22 @@ function handleRequest(response, pathname, query) {
 				break;
 			case '/sendClientUpdate': // Send update to client
 				var user = query.user;
-				var update = query.update;
-				var value = query.value;
+				var data = query.data;
 				var client = clients[getClient(user)];
 
-				console.log('Sending update to user [' + user + '] [' + update + '] = [' + value + ']');
+				//console.log('Sending update to user [' + user + '] [' + update + '] = [' + value + ']');
+				console.log("sent update");
+				console.log(query);
 
 				response.writeHead(200, { 'Content-Type': 'text/plain'} );
-				client.response.write('{\'update\': ' + update + ', \'value\':' + value + '}');
-				client.response.end();
-				response.write("update sent");
+				if (client) {
+					client.response.write(data);
+					client.response.end();
+					console.log('update sent');
+				} else {
+					console.log('No client for spotify [' + user + '] connected');
+				}
+
 				response.end();
 
 				break;
@@ -135,7 +146,7 @@ function handleRequest(response, pathname, query) {
 			default:
 				// Handle invaild url
 				response.writeHead(200, { 'Content-Type': 'text/plain'} );
-				response.write('Wrong url: "' + request.url + '"');	
+				response.write('Wrong url: "' + pathname + '"');	
 				response.end();
 				break;
 		}
