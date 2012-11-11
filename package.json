@@ -1,0 +1,9 @@
+{
+     "name": "spotylessServer",
+     "description": "Handles the call from the SpotylessApp",
+     "version": "0.0.1",
+     "dependencies": {
+        "express": "3.0.1",
+        "socket.io": "0.9.11"
+     }
+}

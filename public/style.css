@@ -1,0 +1,140 @@
+#player {
+	width: 300px;
+}
+
+#trackInfo {
+	background-image: url('images/np-collapsed-badge.png');
+	background-position: 0 -1px;
+	padding: 7px 5px;
+	font-family: HelveticaNeue,Helvetica,"lucida grande",tahoma,Verdana,Arial;
+	color: #FFF;
+	text-shadow: #000 0 1px 1px;
+	font-size: 16px;
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-top-right-radius: 3px;
+}
+
+#trackInfo #artist {
+	font-size: 12px;
+}
+
+#controls {
+	height: 33px;
+	background-image: url('images/np-badge-bottom.png');
+	/*background-image: url('images/playerbg.png');*/
+	padding: 7px 50px;
+	-webkit-border-bottom-left-radius: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+}
+
+#controls a {
+	margin-left: 5px;
+}
+
+#ctrlPlayPause {
+	display: block;
+	width: 32px;
+	height: 33px;
+	background-image: url('images/playpause.png');
+	float: left;
+	background-position: -64px 0;
+}
+
+#ctrlPlayPause.play {
+	background-position: 0 0;
+}
+
+#ctrlPlayPause.play:active {
+	background-position: -32px 0;
+}
+
+#ctrlPlayPause.pause {
+	background-position: -96px;
+}
+
+#ctrlPlayPause.pause:active {
+	background-position: -128px 0;
+}
+
+.ctrlPrevNext {
+	display: block;
+	width: 25px;
+	height: 25px;
+	background-image: url('images/prevnext.png');
+	float: left;
+	margin-top: 5px;
+}
+
+.disabled #ctrlPrev {
+	background-position: -50px 0;
+}
+
+#ctrlPrev {
+	background-position: 0 0;
+}
+
+#ctrlPrev:active {
+	background-position: -25px 0;
+}
+
+.disabled #ctrlPrev:active {
+	background-position: -50px 0;
+}
+
+.disabled #ctrlNext {
+	background-position: -125px 0;
+}
+
+#ctrlNext {
+	background-position: -75px 0;
+}
+
+#ctrlNext:active {
+	background-position: -100px 0;
+}
+
+.disabled #ctrlNext:active {
+	background-position: -125px 0;
+}
+
+.ctrlShuffleRepeat {
+	background-position: 0 -88px;
+	height: 22px;
+	display: block;
+	float: left;
+	margin-top: 5px;
+}
+
+#ctrlShuffle {
+	background-image: url('images/shuffle.png');
+	width: 25px;
+}
+
+#ctrlRepeat {
+	background-image: url('images/repeat.png');
+	width: 21px;
+}
+
+.disabled .ctrlShuffleRepeat {
+	background-position: 0 -88px;
+}
+
+.disabled .ctrlShuffleRepeat:active {
+	background-position: 0 -88px;
+}
+
+.ctrlShuffleRepeat {
+	background-position: 0 0;
+}
+
+.ctrlShuffleRepeat:active {
+	background-position: 0 -22px;
+}
+
+.ctrlShuffleRepeat.activated {
+	background-position: 0 -44px;
+}
+
+.ctrlShuffleRepeat.activated:active {
+	background-position: 0 -66px;
+}

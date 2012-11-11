@@ -75,7 +75,7 @@ function sendIndex(response) {
 }
 
 function handleRequest(response, pathname, query) {
-	console.log("Handeling request", pathname, query);
+	//console.log("Handeling request", pathname, query);
 
 
 	if (pathname == '/') {
@@ -128,7 +128,7 @@ function handleRequest(response, pathname, query) {
 
 				//console.log('Sending update to user [' + user + '] [' + update + '] = [' + value + ']');
 				console.log("sent update");
-				console.log(query);
+				//console.log(query);
 
 				response.writeHead(200, { 'Content-Type': 'text/plain'} );
 				if (client) {
