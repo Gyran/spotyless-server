@@ -3,6 +3,41 @@ var SERVER_PORT = 9004;
 var spotifys = {};
 var clients = {};
 
+/** Spotify
+*** Object of a spotify
+* hash: The spotifys hash
+* socket: Socket to the spotify
+* online: If the spotify is online
+**/
+function Spotify() {
+	this.hash = '';
+	this.socket = null;
+	this.online = false;
+}
+
+/** Client
+*** Object of a connected client
+* spotifyHash: hash of the connected spotify
+* socket: The socket to the client
+**/
+function Client() {
+	this.spotifyHash = '';
+	this.socket = null;
+}
+
+/** User
+*** Object of a user in the database
+* username: Username of the user
+* passwordHash: The hashed password for the user
+* spotifys: Array of listed spotifys
+**/
+function User() {
+	this.username = '';
+	this.passwordHash = '';
+	this.spotifys = [];
+}
+/*********************/
+
 // mongoDB
 var mongo = require('mongodb');
 var mongoServerObj = mongo.Server;
@@ -21,6 +56,14 @@ mongoDb.open(function (err, db) {
 	}
 });
 
+// HTTPS
+var https = require('https');
+var fs = require("fs");
+var options = {
+  key: fs.readFileSync('privatekey.pem'),
+  cert: fs.readFileSync('certificate.pem')
+};
+
 // Express
 var express = require('express');
 var app = express();
@@ -28,7 +71,9 @@ var app = express();
 app.use(express.logger('dev'));
 app.use(express.static(__dirname + '/public'));
 
-var server = app.listen(SERVER_PORT);
+
+var server = https.createServer(options, app).listen(9004);
+//var server = app.listen(SERVER_PORT);
 
 // socket.io
 var io = require('socket.io').listen(server);
@@ -58,6 +103,25 @@ function deleteClient(user) {
 	delete clients[user];
 }
 
+function createNewUser(username, password) {
+	var user = new User();
+	user.username = 
+
+	usersCollection.
+}
+
+function loginOrCreateUser(username, password) {
+	usersCollection.findOne({ 'username': username}, function (err, doc) {
+		if (!err) {
+			if (doc === null) {
+				createNewUser(username, password);
+			} else {
+
+			}
+		}
+	});
+}
+
 var spotifyio = io.of('/spotify')
 	.on('connection', function (socket) {
 
@@ -69,6 +133,10 @@ var spotifyio = io.of('/spotify')
 					client.socket.emit('spotifyDisconnected');
 				}
 			});
+		});
+
+		socket.on('login', function (username, password) {
+			loginOrCreateUser(username, password);
 		});
 
 		// Register spotify

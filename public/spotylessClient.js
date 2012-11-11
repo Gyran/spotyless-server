@@ -6,7 +6,7 @@
 
 	function connectionEstablished() {
 		/* TODO: Double definition */
-		
+
 		$('#ctrlPlayPause').click(function () {
 			console.log('sending command playpause');
 			var command = {type: 'player', action: 'playpause'};
