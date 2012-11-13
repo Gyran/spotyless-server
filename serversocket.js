@@ -1,60 +1,6 @@
 // Spotyless
 var SERVER_PORT = 9004;
-var spotifys = {};
-var clients = {};
-
-/** Spotify
-*** Object of a spotify
-* hash: The spotifys hash
-* socket: Socket to the spotify
-* online: If the spotify is online
-**/
-function Spotify() {
-	this.hash = '';
-	this.socket = null;
-	this.online = false;
-}
-
-/** Client
-*** Object of a connected client
-* spotifyHash: hash of the connected spotify
-* socket: The socket to the client
-**/
-function Client() {
-	this.spotifyHash = '';
-	this.socket = null;
-}
-
-/** User
-*** Object of a user in the database
-* username: Username of the user
-* passwordHash: The hashed password for the user
-* spotifys: Array of listed spotifys
-**/
-function User() {
-	this.username = '';
-	this.passwordHash = '';
-	this.spotifys = [];
-}
-/*********************/
-
-// mongoDB
-var mongo = require('mongodb');
-var mongoServerObj = mongo.Server;
-var mongoDbObj = mongo.Db;
-
-var mongoServer = new mongoServerObj('localhost', 27017, {auto_reconnect: true});
-var mongoDb = new mongoDbObj('spotyless', mongoServer);
-var usersCollection;
-
-mongoDb.open(function (err, db) {
-	if (!err) {
-		db.collection('users', function (err, collection) {
-			usersCollection = collection;
-			console.log('Database connected and collection retrived');
-		});
-	}
-});
+var connectedSpotifys = {};
 
 // HTTPS
 var https = require('https');
@@ -63,6 +9,17 @@ var options = {
   key: fs.readFileSync('privatekey.pem'),
   cert: fs.readFileSync('certificate.pem')
 };
+
+// Database
+var mongoose = require('mongoose');
+var User = require('./userModel');
+mongoose.connect('mongodb://localhost:27017/spotyless', function (err) {
+	if (err) {
+		console.log('couldn\'t connect to db', err);
+	} else {
+		console.log('Database connected');
+	}
+});
 
 // Express
 var express = require('express');
@@ -73,108 +30,154 @@ app.use(express.static(__dirname + '/public'));
 
 
 var server = https.createServer(options, app).listen(9004);
-//var server = app.listen(SERVER_PORT);
 
 // socket.io
 var io = require('socket.io').listen(server);
 
-function addSpotify(user, spotify) {
-	spotifys[user] = spotify;
+function addSpotify(hash, socket) {
+	connectedSpotifys[hash] = { 'socket': socket, 'clients': [] }
 }
 
-function addClient(user, client) {
-	console.log("addClient", user);
-	clients[user] = client;
+function addClient(hash, socket) {
+	connectedSpotifys[hash].clients.push(socket);
 }
 
-function getSpotify(user) {
-	return spotifys[user];
+function getSpotify(hash) {
+	return connectedSpotifys[hash];
 }
 
-function getClient(user) {
-	return clients[user];
+function getClients(hash) {
+	return getSpotify(hash).clients;
 }
 
-function deleteSpotify(user) {
-	delete spotifys[user];
+function deleteSpotify(hash) {
+	delete connectedSpotifys[hash];
 }
 
 function deleteClient(user) {
-	delete clients[user];
+	//delete clients[user];
 }
 
-function createNewUser(username, password) {
-	var user = new User();
-	user.username = 
+function generatePasswordHash(password) {
 
-	usersCollection.
 }
 
-function loginOrCreateUser(username, password) {
-	usersCollection.findOne({ 'username': username}, function (err, doc) {
-		if (!err) {
-			if (doc === null) {
-				createNewUser(username, password);
-			} else {
+function createNewUser(username, password, callback) {
+	var newUser = User();
+	newUser.username = username;
 
-			}
+	newUser.setHash(password, function (err) {
+		if (err) {
+			callback(err);
 		}
+
+		newUser.save(function (err) {
+			if (err) {
+				console.log(err);
+			}
+
+			callback(null, newUser);
+		});
+	});
+
+}
+
+function loginOrCreateUser(username, password, callback) {
+	console.log('loginOrCreateUser');
+	User.exists(username, function (err, exists) {
+		console.log('exists cb');
+		if (err) {
+			return callback(err);
+		}
+
+		if (!exists) {
+			createNewUser(username, password, function (err, user) {
+				if (err) {
+					return callback(err);
+				}
+
+				console.log('created ned user');
+				return callback(null, user);
+			});
+		} else {
+			User.authenticate(username, password, function (err, user) {
+				if (err) {
+					return callback(err);
+				}
+
+				if (!user) {
+					return callback(null, false);
+				}
+
+				// user authenticated
+				return callback(null, user);
+			});
+		}
+
 	});
 }
 
 var spotifyio = io.of('/spotify')
 	.on('connection', function (socket) {
 
-		socket.on('disconnect', function () {
-			socket.get('user', function (err, user) {
-				deleteSpotify(user);
-				var client = getClient(user);
-				if (client) {
-					client.socket.emit('spotifyDisconnected');
+		socket.on('login', function (username, password) {
+			loginOrCreateUser(username, password, function (err, user) {
+				if (err) {
+					console.log('err', err);
+				} else if (!user) {
+					socket.emit('wrong password');
+				} else {
+					socket.set('username', user.username, function () {
+						socket.emit('authenticated', user.username);
+					});
 				}
 			});
 		});
 
-		socket.on('login', function (username, password) {
-			loginOrCreateUser(username, password);
-		});
-
 		// Register spotify
-		socket.on('register', function (data) {
-			console.log('register spotify', data.user);
+		socket.on('register', function (hash) {
+			// Update the user
+			socket.get('username', function (err, username) {
+				User.addSpotify(username, hash, function (err) {
+					if (err) {
+						console.log('error');
+					}
 
-			// Save the spotify socket
-			addSpotify(data.user, { 'socket': socket });
-			
-			// Set the user for this socket
-			socket.set('user', data.user, function () {
-				socket.emit('ready');
+					// Set the hash for this socket
+					socket.set('hash', hash, function () {
+						addSpotify(hash, socket);
+						socket.emit('registred');
+					});
+				});
 			});
 		});
 
 		socket.on('playerUpdated', function (player) {
-			socket.get('user', function (err, user) {
-
-				// Send the player to the client
-				var client = getClient(user);
-				if (client) {
-					client.socket.emit('playerUpdated', player);
-				}
+			console.log('playerUpdated');
+			socket.get('hash', function (err, hash) {
+				getClients(hash).forEach(function (index, socket) {
+					socket.emit('playerUpdated', player);
+				});
 			});
-
 		});
-
 	});
 
 var clientio  = io.of('/client')
 	.on('connection', function (socket) {
-
-		socket.on('disconnect', function () {
-			socket.get('user', function (err, user) {
-				deleteClient(user);
+		
+		socket.on('getSpotifys', function() {
+			socket.get('username', function (err, username) {
+				console.log(username);
+				User.getSpotifys(username, function (err, spotifys) {
+					if (err) {
+						console.log('get spotifyes err', err);
+					} else {
+						socket.emit('sendSpotifys', spotifys);
+					}
+				});
 			});
 		});
-		
+
 		// Register client
 		socket.on('register', function (data) {
 			console.log('register client', data);
