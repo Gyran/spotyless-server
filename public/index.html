@@ -8,11 +8,36 @@
 
 </head>
 <body>
+	<h1>Spotyless</h1>
+
 	<div id='login'>
-		<label id='userlabel'>userkey: <input id='userkey' type='text'></label>
-		<button id='btnLogin' disabled='true'>Login!</button>
+		<div>
+			<label for='username'>Username:</label>
+			<input type='text' id='username'>
+		</div>
+		<div>
+			<Label for='password'>Password:</label> 
+			<input class='sp-input>' type='password' id='password'>
+		</div>
+
+		<div class='submit'>
+			<button class="sp-button" id='btnLogin'>Login</button>
+		</div>
 	</div>
 	
+	<ul id='spotifysList' style='display:none;'>
+		<!-- -->
+	</ul>
+
+	<div id='logout' style='display:none;'>
+		<div id='loggedinAs'>
+			<!-- -->
+		</div>
+		<div class='submit'>
+			<button class="sp-button" id='btnLogout'>Logout</button>
+		</div>
+	</div>
+
 	<div id='player' class='disabled'>
 		<div id='trackInfo'>
 			<div id='playingTitle'>Not logged in..</div>

@@ -2,50 +2,21 @@
 	"use strict";
 
 	var socket;
-	var firstTime = true;
+	var APP_registred;
+	var APP_logged_in;
+	var APP_username;
 
-	function connectionEstablished() {
-		/* TODO: Double definition */
+	function playerUpdated(player) {
+		console.log('player updated');
 
-		$('#ctrlPlayPause').click(function () {
-			console.log('sending command playpause');
-			var command = {type: 'player', action: 'playpause'};
-			socket.emit('sendCommand', command);
-		});
-
-		$('#ctrlNext').click(function () {
-			var command = {type: 'player', action: 'next'};
-			socket.emit('sendCommand', command);
-		});
-
-		$('#ctrlPrev').click(function () {
-			var command = {type: 'player', action: 'previous'};
-			socket.emit('sendCommand', command);
-		});
-
-		$('#ctrlShuffle').click(function () {
-			var command = {type: 'player', action: 'shuffle'};
-			socket.emit('sendCommand', command);
-		});
-
-		$('#ctrlRepeat').click(function () {
-			var command = {type: 'player', action: 'repeat'};
-			socket.emit('sendCommand', command);
-		});
-
-		$('#login').hide();
-		$('#player').removeClass('disabled');
-	}
-
-	function playerUpdated(player) {		
 		if (player.playing) {
 			$('#ctrlPlayPause').removeClass('play pause').addClass('pause');
 		} else {
 			$('#ctrlPlayPause').removeClass('play pause').addClass('play');
 		}
 
-		$('#playingTitle').text(player.track.data.name);
-		$('#playingArtist').text(player.track.data.artists[0].name);
+		$('#playingTitle').html(player.track.data.name);
+		$('#playingArtist').html(player.track.data.artists[0].name);
 		
 		if (player.shuffle) {
 			$('#ctrlShuffle').addClass('activated');
@@ -61,58 +32,150 @@
 
 	}
 
-	function gotError(err) {
-		alert(err);
-	}
-
-	function disconnected() {
-		console.log('socket disconnected');
-	}
-
-	function spotifyDisconnected() {
+	function disablePlayer() {
 		$('#player').addClass('disabled');
 		$('#ctrlRepeat').removeClass('activated');
 		$('#ctrlShuffle').removeClass('activated');
 		$('#ctrlPlayPause').removeClass('play pause');
 
-		$('#playingTitle').text('Spotify not connected..');
-		$('#playingArtist').text('&nbsp;');
-
-		$('#login').show();
+		$('#playingTitle').text('');
+		$('#playingArtist').html('&nbsp;');
 	}
 
-	function login(user) {
-		socket = io.connect('http://gyran.se:9004/client');
+	function logout() {
+		$('#btnLogout').attr('disabled', 'disabled');
+		$('#btnLogin').removeAttr('disabled');
+		socket.emit('logout');
 
-		if (firstTime) {
-			console.log('doing socket ons');
-			// Got ok from server
-			socket.on('ready', connectionEstablished);
+		disablePlayer();
+		$('#login').show();
+		$('#logout').hide();
+		$('#spotifysList').html('').hide();
+		APP_registred = false;
+		APP_logged_in = false;
+	}
 
-			// Player in spotify updated
-			socket.on('playerUpdated', playerUpdated);
+	function login() {
+		console.log('kör login');
+		$('#btnLogin').attr('disabled', 'disabled');
+		$('#btnLogout').removeAttr('disabled');
 
-			socket.on('errorMsg', gotError);
+		$('#password').removeClass('wrong');
+		var username = $('#username').val();
+		var password = $('#password').val();
+		$('#password').val('');
 
-			socket.on('disconnect', disconnected);
+		socket.emit('login', username, password);
+	}
 
-			socket.on('spotifyDisconnected', spotifyDisconnected);
+	// When the connection to the server has been established
+	function connectionEstablished() {
+		console.log('connectionEstablished');
+	}
 
-			firstTime = false;
+	// Server responded wrong password
+	function wrongPassword() {
+		$('#password').val('');
+		$('#password').addClass('wrong');
+		$('#btnLogin').removeAttr('disabled');
+	}
+
+	// Login succeeded
+	function authenticated(username) {
+		APP_logged_in = true;
+		APP_username = username;
+
+		$('#login').hide();
+		$('#loggedinAs').text('Logged in as ' + APP_username);
+		$('#logout').show();
+
+		socket.emit('getSpotifys');
+
+	}
+
+	function registerSpotify() {
+		var hash = this.text;
+
+		socket.emit('register', hash);
+
+	}
+
+	function spotifysReceived (spotifys) {
+		$.each(spotifys, function (i, hash) {
+			var li = $('<li/>');
+			
+			$('<a></a>', {
+				text: hash,
+				href: '#',
+				click: registerSpotify
+			}).appendTo(li);
+
+			li.appendTo('#spotifysList');
+		});
+
+		$('#spotifysList').show();
+	}
+
+	// we have registred with a spotify
+	function registred() {
+		console.log('registred');
+		APP_registred = true;
+		$('#player').removeClass('disabled');
+	}
+
+	function sendCommand(command) {
+		if (APP_registred) {
+			socket.emit('sendCommand', command);
 		}
+	}
 
-		// Register userid
-		socket.emit('register', { 'user': user });
+	function spotifyLoggedOut() {
+		logout();
 	}
 
 	function init() {
-		$('#userkey').val('7818e395028f89f5a72e18681ea5d6a16e4a3dc4');
+		socket = io.connect('/client');
 
-		$('#btnLogin').click(function (e) {
-			login($('#userkey').val());
+		socket.on('connect', connectionEstablished);
+		socket.on('wrong password', wrongPassword);
+		socket.on('authenticated', authenticated);
+		socket.on('registred', registred);
+		socket.on('sendSpotifys', spotifysReceived);
+		socket.on('spotifyLoggedOut', spotifyLoggedOut);
+
+		// Player in spotify updated
+		socket.on('playerUpdated', playerUpdated);
+
+		$('#username').val('Gyran');
+		console.log('wut');
+
+		$('#btnLogin').click(login);
+		$('#btnLogout').click(logout);
+
+		$('#ctrlPlayPause').click(function () {
+			var command = {type: 'player', action: 'playpause'};
+			sendCommand(command);
 		});
 
-		$('#btnLogin').removeAttr("disabled");
+		$('#ctrlNext').click(function () {
+			var command = {type: 'player', action: 'next'};
+			sendCommand(command);
+		});
+
+		$('#ctrlPrev').click(function () {
+			var command = {type: 'player', action: 'previous'};
+			sendCommand(command);
+		});
+
+		$('#ctrlShuffle').click(function () {
+			var command = {type: 'player', action: 'shuffle'};
+			sendCommand(command);
+		});
+
+		$('#ctrlRepeat').click(function () {
+			var command = {type: 'player', action: 'repeat'};
+			sendCommand(command);
+		});
 	}
 
 	$(document).ready(function () {

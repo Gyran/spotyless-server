@@ -1,5 +1,85 @@
+body {
+	background-image: url('images/intro_view-bg.png');
+	color: #999;
+	font: 12px/17px "Lucida Grande", "Tahoma", "Arial", sans-serif;
+}
+
+h1 {
+	text-align: center;
+}
+
+/** Login ***/
+
+#login {
+	text-align: center;
+	width: 300px;
+	padding: 10px;
+	position: relative;
+	margin: auto auto;
+}
+
+#login div {
+	margin-bottom: 10px;
+}
+
+#login label {
+	display: block;
+	width: 25%;
+	float: left;
+	text-align: right;
+}
+
+#login .submit {
+	
+}
+
+#password.wrong {
+	border: 1px solid #F00;
+}
+
+.sp-button {
+-webkit-border-image: url("images/info_group-button.png") 0 7 42 7;
+background: initial;
+border: initial;
+border-width: 0 7px;
+box-sizing: border-box;
+color: #333;
+cursor: default;
+display: inline-block;
+font-size: 12px;
+line-height: 17px;
+margin: 0;
+max-width: 100%;
+overflow: hidden;
+padding: 2px;
+text-decoration: none;
+text-overflow: ellipsis;
+text-shadow: 0 1px 0 #EEE;
+white-space: nowrap;
+}
+
+.sp-button:active {
+-webkit-border-image: url("images/info_group-button.png") 21 11 21 11;
+}
+
+/************/
+
+/** SpotifysList **/
+#spotifysList {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#spotifysList li {
+	background-color: #a2a2a2;
+	padding: 3px;
+}
+
+/** Player **/
 #player {
 	width: 300px;
+	margin: auto auto;
 }
 
 #trackInfo {
@@ -16,6 +96,11 @@
 
 #trackInfo #artist {
 	font-size: 12px;
+}
+
+#trackInfo {
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 #controls {
@@ -138,3 +223,4 @@
 .ctrlShuffleRepeat.activated:active {
 	background-position: 0 -66px;
 }
+/************/
