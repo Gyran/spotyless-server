@@ -25,9 +25,9 @@
 		</div>
 	</div>
 	
-	<ul id='spotifysList' style='display:none;'>
+	<table id='spotifysList' style='display:none;'>
 		<!-- -->
-	</ul>
+	</table>
 
 	<div id='logout' style='display:none;'>
 		<div id='loggedinAs'>
@@ -38,19 +38,34 @@
 		</div>
 	</div>
 
-	<div id='player' class='disabled'>
+	<div id='player'>
 		<div id='trackInfo'>
 			<div id='playingTitle'>Not logged in..</div>
 			<div id='playingArtist'>&nbsp;</div>
 		</div>
 		<div id='controls'>
-			<a id='ctrlPrev' class='ctrlPrevNext' href='#'><!-- --></a>
-			<a id='ctrlPlayPause' href='#'><!-- --></a>
-			<a id='ctrlNext' class='ctrlPrevNext' href='#'><!-- --></a>
-			<a id='ctrlShuffle' class='ctrlShuffleRepeat' href='#'><!-- --></a>
-			<a id='ctrlRepeat' class='ctrlShuffleRepeat' href='#'><!-- --></a>
+			<a id='ctrlPrev' class='ctrlPrevNext disabled' href='#'><!-- --></a>
+			<a id='ctrlPlayPause' class='disabled' href='#'><!-- --></a>
+			<a id='ctrlNext' class='ctrlPrevNext disabled' href='#'><!-- --></a>
+			<a id='ctrlShuffle' class='ctrlShuffleRepeat disabled' href='#'><!-- --></a>
+			<a id='ctrlRepeat' class='ctrlShuffleRepeat disabled' href='#'><!-- --></a>
 		</div>
 	</div>
+
+	<button class="sp-button" id='btnSpotylessPlay'>Play using Spotyless</button>
+
+	<input type='text' id='searchNeedle'>
+	<button class="sp-button" id='btnSearch'>
+		Search
+	</button>
+
+	<table id='search'>
+		<!-- -->
+	</table>
+
+	<table id='playlist'>
+		<!-- -->
+	</table>
 
 <script type="text/javascript">
 

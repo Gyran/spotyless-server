@@ -59,21 +59,37 @@ white-space: nowrap;
 }
 
 .sp-button:active {
--webkit-border-image: url("images/info_group-button.png") 21 11 21 11;
+	-webkit-border-image: url("images/info_group-button.png") 21 11 21 11;
+}
+
+.list:nth-child(odd) {
+	background-color: #333;
 }
 
 /************/
 
 /** SpotifysList **/
 #spotifysList {
-	list-style: none;
-	margin: 0;
+	margin: auto auto;
 	padding: 0;
+	width: 300px;
+	border-collapse: collapse;
 }
 
-#spotifysList li {
-	background-color: #a2a2a2;
+#spotifysList tr {
 	padding: 3px;
+}
+
+#spotifysList tr.selected {
+	background-color: #6C6C6C;
+}
+
+#spotifysList .online {
+	color: #0F0;
+}
+
+#spotifysList .offline {
+	color: #F00;
 }
 
 /** Player **/
@@ -150,7 +166,7 @@ white-space: nowrap;
 	margin-top: 5px;
 }
 
-.disabled #ctrlPrev {
+#ctrlPrev.disabled {
 	background-position: -50px 0;
 }
 
@@ -162,11 +178,11 @@ white-space: nowrap;
 	background-position: -25px 0;
 }
 
-.disabled #ctrlPrev:active {
+#ctrlPrev.disabled:active {
 	background-position: -50px 0;
 }
 
-.disabled #ctrlNext {
+#ctrlNext.disabled {
 	background-position: -125px 0;
 }
 
@@ -178,7 +194,7 @@ white-space: nowrap;
 	background-position: -100px 0;
 }
 
-.disabled #ctrlNext:active {
+#ctrlNext.disabled:active {
 	background-position: -125px 0;
 }
 
@@ -200,11 +216,11 @@ white-space: nowrap;
 	width: 21px;
 }
 
-.disabled .ctrlShuffleRepeat {
+.disabled.ctrlShuffleRepeat {
 	background-position: 0 -88px;
 }
 
-.disabled .ctrlShuffleRepeat:active {
+.disabled.ctrlShuffleRepeat:active {
 	background-position: 0 -88px;
 }
 
@@ -224,3 +240,7 @@ white-space: nowrap;
 	background-position: 0 -66px;
 }
 /************/
+
+#search {
+	border-collapse: collapse;
+}
